@@ -113,6 +113,7 @@ class CountMaster(object):
                 top_right = self.document_topic_counts[doc_index][j] + self.alpha
                 if j == token_topic:
                     bottom_left -= 1
+                    top_right -= 1
                 pi_j = (top_left/bottom_left)*top_right
                 pi.append(pi_j)
                 total += pi_j
