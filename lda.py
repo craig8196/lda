@@ -8,6 +8,7 @@ import math
 import numpy as np
 import scipy as sp
 from scipy.special import gammaln
+from numpy.random import random as randfloat
 
 
 class CountMaster(object):
@@ -67,7 +68,10 @@ class CountMaster(object):
                 topic = token_topics[i]
                 self.topic_totals[topic] += 1
                 self.topics[topic][tok_num] += 1
+        self.check_counts()
         
+    def check_counts(self):
+        # check that the counts are adding up properly
         sum_tokens = 0
         sum_tokens2 = 0
         for t in xrange(self.num_topics):
@@ -109,7 +113,7 @@ class CountMaster(object):
                 top_right = self.document_topic_counts[doc_index][j] + self.alpha
                 if j == token_topic:
                     bottom_left -= 1
-                pi_j = (top_left*top_right)/bottom_left
+                pi_j = (top_left/bottom_left)*top_right
                 pi.append(pi_j)
                 total += pi_j
             except:
@@ -169,7 +173,7 @@ class CountMaster(object):
             for w_count in topics[j]:
                 temp_topic_ll += gammaln(w_count + B)
             ll += temp_topic_ll
-        
+        self.check_counts()
         return ll
 
 class LDA(object):
@@ -183,7 +187,7 @@ class LDA(object):
         self.log_likelihoods = []
     
     def run_analysis(self, document_iterator, seed=0):
-        random.seed(seed)
+        #~ random.seed(seed)
         
         print('----------Initializing----------')
         self.cm = cm = CountMaster(self.num_topics, self.alpha, self.beta)
