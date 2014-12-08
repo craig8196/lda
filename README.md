@@ -1,4 +1,4 @@
-lda
+Latent Dirichlet Allocation (LDA)
 ===
 
-LDA
+My LDA implementation.
