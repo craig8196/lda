@@ -8,6 +8,7 @@ import math
 import numpy as np
 import scipy as sp
 from scipy.special import gammaln
+from scipy.special import gamma
 from numpy.random import random as randfloat
 
 
@@ -160,6 +161,8 @@ class CountMaster(object):
             print('%s(%s) '%(str(self.numbers_to_types[token_number]), str(t[token_number])), end='')
     
     def log_likelihood(self):
+        def gammaln(num):
+            return math.log(gamma(num))
         V = len(self.numbers_to_types)
         T = self.num_topics
         topics = self.topics
@@ -169,13 +172,37 @@ class CountMaster(object):
         TA = T*A
         D = self.get_num_documents()
                 
-        ll = T*(gammaln(VB) - V*gammaln(B))
+        #~ ll = T*(gammaln(VB) - V*gammaln(B))
+        #~ for j in xrange(T):
+            #~ temp_topic_ll = -gammaln(self.topic_totals[j] + VB)
+            #~ for w_count in topics[j]:
+                #~ if w_count > 0:
+                    #~ temp_topic_ll += gammaln(w_count + B)
+            #~ ll += temp_topic_ll
+        
+        ll = 0
         for j in xrange(T):
-            temp_topic_ll = -gammaln(self.topic_totals[j] + VB)
+            j_total = self.topic_totals[j]
             for w_count in topics[j]:
                 if w_count > 0:
-                    temp_topic_ll += gammaln(w_count + B)
-            ll += temp_topic_ll
+                    ll += math.log(w_count) - math.log(j_total)
+        
+        #~ V = len(self.numbers_to_types)
+        #~ T = self.num_topics
+        #~ topics = self.topics
+        #~ B = self.beta
+        #~ VB = V*B
+        #~ A = self.alpha
+        #~ TA = T*A
+        #~ D = self.get_num_documents()
+                #~ 
+        #~ ll = T*(gammaln(VB + 1) - V*gammaln(B + 1))
+        #~ for j in xrange(T):
+            #~ temp_topic_ll = -gammaln(self.topic_totals[j] + VB + 1)
+            #~ for w_count in topics[j]:
+                #~ if w_count > 0:
+                    #~ temp_topic_ll += gammaln(w_count + B + 1)
+            #~ ll += temp_topic_ll
         
         #~ ll += D*(gammaln(TA) - T*gammaln(A))
         #~ for d in xrange(D):
