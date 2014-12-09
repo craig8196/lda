@@ -93,6 +93,11 @@ class CountMaster(object):
         token_topic = self.document_token_topics[doc_index][tok_index]
         vocab_beta = len(self.types_to_numbers)*self.beta
         
+        old_topic = self.document_token_topics[doc_index][tok_index]
+        self.document_topic_counts[doc_index][old_topic] -= 1
+        self.topic_totals[old_topic] -= 1
+        self.topics[old_topic][token_number] -= 1
+        
         total = 0
         for j in xrange(self.num_topics):
             try:
@@ -111,9 +116,6 @@ class CountMaster(object):
                 top_left = self.topics[j][token_number] + self.beta
                 bottom_left = self.topic_totals[j] + vocab_beta
                 top_right = self.document_topic_counts[doc_index][j] + self.alpha
-                if j == token_topic:
-                    bottom_left -= 1
-                    top_right -= 1
                 pi_j = (top_left/bottom_left)*top_right
                 pi.append(pi_j)
                 total += pi_j
@@ -141,12 +143,8 @@ class CountMaster(object):
     
     def update_token_topic_assignment(self, doc_index, tok_index, new_topic):
         token_number = self.document_token_numbers[doc_index][tok_index]
-        old_topic = self.document_token_topics[doc_index][tok_index]
         self.document_token_topics[doc_index][tok_index] = new_topic
-        self.document_topic_counts[doc_index][old_topic] -= 1
         self.document_topic_counts[doc_index][new_topic] += 1
-        self.topic_totals[old_topic] -= 1
-        self.topics[old_topic][token_number] -= 1
         self.topic_totals[new_topic] += 1
         self.topics[new_topic][token_number] += 1
     
@@ -170,19 +168,20 @@ class CountMaster(object):
         TA = T*A
         D = self.get_num_documents()
                 
-        ll = T*(gammaln(VB) - V*gammaln(B))
+        ll = T*(gammaln(VB + 1) - V*gammaln(B))
         for j in xrange(T):
             temp_topic_ll = -gammaln(self.topic_totals[j] + VB)
             for w_count in topics[j]:
-                temp_topic_ll += gammaln(w_count + B)
+                if w_count > 0:
+                    temp_topic_ll += gammaln(w_count + B)
             ll += temp_topic_ll
         
-        ll += D*(gammaln(TA) - T*gammaln(A))
-        for d in xrange(D):
-            temp_doc_ll = -gammaln(self.get_num_tokens(d) + TA)
-            for doc_topic_count in self.document_token_topics[d]:
-                temp_doc_ll += gammaln(doc_topic_count + A)
-            ll += temp_doc_ll
+        #~ ll += D*(gammaln(TA) - T*gammaln(A))
+        #~ for d in xrange(D):
+            #~ temp_doc_ll = -gammaln(self.get_num_tokens(d) + TA)
+            #~ for doc_topic_count in self.document_token_topics[d]:
+                #~ temp_doc_ll += gammaln(doc_topic_count + A)
+            #~ ll += temp_doc_ll
         
         return ll
 
@@ -198,15 +197,17 @@ class LDA(object):
     
     def run_analysis(self, document_iterator, seed=0):
         #~ random.seed(seed)
-        
-        print('----------Initializing----------')
         self.cm = cm = CountMaster(self.num_topics, self.alpha, self.beta)
         
+        print('----------Initializing----------')
         # preprocess documents
         for tokens in document_iterator:
             cm.add_tokens(tokens)
         
         cm.done_adding_tokens()
+        
+        print("Vocab Size:", len(cm.numbers_to_types))
+        print("Dataset Size:", cm.get_num_documents())
         
         self.log_likelihoods.append(cm.log_likelihood())
         

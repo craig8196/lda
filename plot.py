@@ -19,7 +19,8 @@ def plot(file_name):
 
 
 if __name__ == "__main__":
-    file_name = 'results_test.json'
-    #~ file_name = 'results_state_of_the_union.json'
+    #~ file_name = 'results_test.json'
+    file_name = 'results_state_of_the_union.json'
+    #~ file_name = 's2.json'
     plot(file_name)
     
