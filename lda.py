@@ -136,6 +136,7 @@ class CountMaster(object):
         r = random.random()*total
         total_num = 0
         for topic, num in enumerate(pi):
+            assert num > 0
             total_num += num
             if r < total_num:
                 break
@@ -168,7 +169,7 @@ class CountMaster(object):
         TA = T*A
         D = self.get_num_documents()
                 
-        ll = T*(gammaln(VB + 1) - V*gammaln(B))
+        ll = T*(gammaln(VB) - V*gammaln(B))
         for j in xrange(T):
             temp_topic_ll = -gammaln(self.topic_totals[j] + VB)
             for w_count in topics[j]:
