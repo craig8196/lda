@@ -166,15 +166,24 @@ class CountMaster(object):
         topics = self.topics
         B = self.beta
         VB = V*B
-        
+        A = self.alpha
+        TA = T*A
+        D = self.get_num_documents()
+                
         ll = T*(gammaln(VB) - V*gammaln(B))
-        
         for j in xrange(T):
             temp_topic_ll = -gammaln(self.topic_totals[j] + VB)
             for w_count in topics[j]:
                 temp_topic_ll += gammaln(w_count + B)
             ll += temp_topic_ll
-        self.check_counts()
+        
+        ll += D*(gammaln(TA) - T*gammaln(A))
+        for d in xrange(D):
+            temp_doc_ll = -gammaln(self.get_num_tokens(d) + TA)
+            for doc_topic_count in self.document_token_topics[d]:
+                temp_doc_ll += gammaln(doc_topic_count + A)
+            ll += temp_doc_ll
+        
         return ll
 
 class LDA(object):
