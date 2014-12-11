@@ -75,7 +75,7 @@ if __name__ == "__main__":
     # Format: (name of analysis, number of topics, alpha, beta, burn, length, dataset feature vector iterator)
     given = [
         #~ ("test", 2, 0.1, 0.1, 100, 10, test_data),
-        ('state_of_the_union', 50, 0.1, 0.1, 99, 1, state_of_the_union),
+        ('state_of_the_union', 5, 0.1, 0.1, 499, 1, state_of_the_union),
     ]
     
     for settings in given:

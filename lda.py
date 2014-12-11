@@ -160,9 +160,17 @@ class CountMaster(object):
         for token_number in s:
             print('%s(%s) '%(str(self.numbers_to_types[token_number]), str(t[token_number])), end='')
     
+    def log_beta(self, alphas, constant):
+        s = gammaln(alphas[0] + constant)
+        for i in xrange(1, len(alphas)):
+            if alphas[i]+constant == 0:
+                print(alphas[i])
+            s += gammaln(alphas[i] + constant)
+        return s - gammaln(sum(alphas)+len(alphas)*constant)
+    
     def log_likelihood(self):
-        def gammaln(num):
-            return math.log(gamma(num))
+        #~ def gammaln(num):
+            #~ return math.log(gamma(num))
         V = len(self.numbers_to_types)
         T = self.num_topics
         topics = self.topics
@@ -181,11 +189,14 @@ class CountMaster(object):
             #~ ll += temp_topic_ll
         
         ll = 0
+        for d in xrange(D):
+            ll += self.log_beta(self.document_topic_counts[d], A)
         for j in xrange(T):
-            j_total = self.topic_totals[j]
-            for w_count in topics[j]:
-                if w_count > 0:
-                    ll += math.log(w_count) - math.log(j_total)
+            ll += self.log_beta(self.topics[j], B)
+            #~ j_total = self.topic_totals[j]
+            #~ for w_count in topics[j]:
+                #~ if w_count > 0:
+                    #~ ll += math.log(w_count) - math.log(j_total)
         
         #~ V = len(self.numbers_to_types)
         #~ T = self.num_topics
